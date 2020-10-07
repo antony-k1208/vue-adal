@@ -1,29 +1,18 @@
-import { AuthenticationContext } from './authentication-context'
-import { AxiosAuthHttp } from './axios-http.js'
+import { AuthenticationContext } from './authentication-context';
+import { AxiosAuthHttp } from './axios-http.js';
 
-let authenticationContext = null
+let authContextInstance = null;
 
 const AdalPlugin = {
-  install (vue, opts = {}) {
-    authenticationContext = new AuthenticationContext(opts)
-    vue.prototype.$adal = authenticationContext
+  install(app, opts = {}) {
+    authContextInstance = new AuthenticationContext(opts);
+    app.config.globalProperties.$adal = authContextInstance;
+  },
+};
 
-    vue.mixin({
-      data () {
-        return {
-          authenticated: false
-        }
-      },
-
-      computed: {
-        isAuthenticated () {
-          this.authenticated = this.$adal.isAuthenticated()
-          return this.authenticated
-        }
-      }
-    })
-  }
-}
-
-export default AdalPlugin
-export { authenticationContext as AuthenticationContext, AxiosAuthHttp }
+export default AdalPlugin;
+export {
+  authContextInstance as AuthContextInstance,
+  AxiosAuthHttp,
+  AuthenticationContext,
+};

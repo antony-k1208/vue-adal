@@ -20,9 +20,9 @@ Vue.use(Adal, {
 })
 
 Vue.use({
-  install (vue, opts = {}) {
+  install (app, opts = {}) {
     // Configures an axios http client with a interceptor to auto-acquire tokens
-    vue.prototype.$graphApi = AxiosAuthHttp.createNewClient({
+    app.config.globalProperties.$graphApi = AxiosAuthHttp.createNewClient({
       // Required Params
       axios: axios,
       resourceId: graphApiResource, // Resource id to get a token against
