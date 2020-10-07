@@ -1,20 +1,20 @@
-import { AuthenticationContext } from './'
+import { AuthContextInstance } from './'
 
 const getToken = (resource, http, cb) => {
-  AuthenticationContext.acquireToken(resource, (err, token) => {
+  AuthContextInstance.acquireToken(resource, (err, token) => {
     if (err) {
       let errCode = err.split(':')[0]
       switch (errCode) {
         case 'AADSTS50058': // Need to prompt for user sign in
-          AuthenticationContext.login()
+          AuthContextInstance.login()
           break
         case 'AADSTS65001': // Token is invalid; grab a new one
-          AuthenticationContext.acquireTokenRedirect(resource)
+          AuthContextInstance.acquireTokenRedirect(resource)
           break
         case 'AADSTS16000': // No Access
         default:
           // Need a pop-up forcing a login
-          AuthenticationContext.login()
+          AuthContextInstance.login()
           break
       }
       cb(new Error('Failed to acquire token'))
@@ -49,7 +49,7 @@ export class AxiosAuthHttp {
       return response
     }, (error) => {
       if (error.response.status === 401) {
-        AuthenticationContext.adalContext.clearCacheForResource(options.resourceId)
+        AuthContextInstance.adalContext.clearCacheForResource(options.resourceId)
         return new Promise((resolve, reject) => getToken(options.resourceId, http, () => {
           let config = error.response.config
           config.headers.Authorization = http.defaults.headers['Authorization']
@@ -84,7 +84,7 @@ export class AxiosAuthHttp {
           return
         }
         if (options.onTokenSuccess instanceof Function) {
-          options.onTokenSuccess(http, AuthenticationContext, token)
+          options.onTokenSuccess(http, AuthContextInstance, token)
         }
         next()
       })
