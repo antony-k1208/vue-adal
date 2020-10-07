@@ -16,7 +16,7 @@ npm install vue-adal
 
 ```javascript
 import Adal from 'vue-adal'
-Vue.use(Adal, {
+app.use(Adal, {
 // This config gets passed along to Adal, so all settings available to adal can be used here.
   config: {
     // 'common' (multi-tenant gateway) or Azure AD Tenant ID
@@ -42,10 +42,9 @@ Vue.use(Adal, {
 **important**: make sure to set the mode on your router to 'history' so that it doesn't use hashes!  This will have implications on the serverside.
 
 ```javascript
-new Router({
-  mode: 'history', // Required for Adal library
-  ... // Rest of router init
-})
+const router = createRouter({
+  history: createWebHistory(process.env.BASE_URL)
+});
 ```
 
 ### Getting user Information
@@ -53,10 +52,10 @@ new Router({
 After signing in, get access to the user as follows:
 
 ```javascript
-import { AuthenticationContext } from 'vue-adal' // This will be populated with a valid context after initialization
+import { AuthContextInstance } from 'vue-adal' // This will be populated with a valid context after initialization
 
 ...
-const profile = AuthenticationContext.user.profile
+const profile = AuthContextInstance.user.profile
 ...
 ```
 
@@ -81,7 +80,7 @@ import { default as Adal, AxiosAuthHttp } from 'vue-adal'
 Vue.use({
   install (vue, opts = {}) {
     // Configures an axios http client with a interceptor to auto-acquire tokens
-    vue.prototype.$graphApi = AxiosAuthHttp.createNewClient({
+    app.config.globalProperties.$graphApi = AxiosAuthHttp.createNewClient({
       // Required Params
       axios: axios,
       resourceId: graphApiResource, // Resource id to get a token against
@@ -118,23 +117,23 @@ Take a look at the sample for more details.
 If you'd like to get a token yourself, use the acquireToken command on the Authentication context:
 
 ```javascript
-import { AuthenticationContext } from 'vue-adal' // This will be populated with a valid context after initialization
+import { AuthContextInstance } from 'vue-adal' // This will be populated with a valid context after initialization
 
 ...
-  AuthenticationContext.acquireToken(resource, (err, token) => {
+  AuthContextInstance.acquireToken(resource, (err, token) => {
     if (err) {
       let errCode = err.split(':')[0]
       switch (errCode) {
         case 'AADSTS50058': // Need to prompt for user sign in
-          AuthenticationContext.login()
+          AuthContextInstance.login()
           break
         case 'AADSTS65001': // Token is invalid; grab a new one
-          AuthenticationContext.acquireTokenRedirect(resource)
+          AuthContextInstance.acquireTokenRedirect(resource)
           break
         case 'AADSTS16000': // No Access
         default:
           // Need a pop-up forcing a login
-          AuthenticationContext.login()
+          AuthContextInstance.login()
           break
       }
       return
